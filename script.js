@@ -17,7 +17,7 @@ dotenv.config({ path: './.env' })
 const app = express()
 app.set("trust proxy", 1);
 app.use(cors({
-    origin:['http://localhost:5173',process.env.FRONTEND_URL],
+    origin:['http://localhost:5173',"https://netsettle-frontend.vercel.app"],
     credentials:true
 }))
 app.use(cookieParser())
