@@ -55,6 +55,10 @@ app.post('/signup',async(req,res)=>{
     
 })
 
+app.get('/',(req,res)=>{
+    res.send("SERVER LIVE")
+})
+
 app.post('/login',async(req,res)=>{
     const eml = await  usermodel.findOne({email:req.body.email}).lean()
     if(!eml){
