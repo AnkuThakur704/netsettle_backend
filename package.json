@@ -5,9 +5,8 @@
   "main": "script.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node script",
-    "dev": "node --watch script"
+    "start": "node script.js",
+    "dev": "node --watch script.js"
   },
   "author": "Ankush 24BCS020",
   "license": "MIT",

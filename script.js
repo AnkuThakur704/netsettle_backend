@@ -17,7 +17,7 @@ dotenv.config({ path: './.env' })
 const app = express()
 app.set("trust proxy", 1);
 app.use(cors({
-    origin:['http://localhost:5173',"https://exhaust-considers-sport-sight.trycloudflare.com"],
+    origin:['http://localhost:5173',process.env.FRONTEND_URL],
     credentials:true
 }))
 app.use(cookieParser())
@@ -81,47 +81,36 @@ app.post('/login',async(req,res)=>{
 })
 
 app.post('/dashboard',checktoken,async(req,res)=>{
-    console.log("dash hit")
     const user = await usermodel.findOne({email:req.email}).lean()
     if(user){
-        console.log("this is if user")
         const usertrips = user.trips
-        console.log("this is user trips: ",usertrips,usertrips.length)
         const trarr = []
         if(usertrips.length==0){
             res.json({success:true,nm:user.name,redirect:'/dashboard'})
         
         }
         if(usertrips.length>0){
-            console.log("this is if usertrips.lenght>0")
              for(let i of usertrips){
             const tripdata = await tripmodel.findOne({tripCode:i.trcode}).lean()
             trarr.push(tripdata)
         }
         const bal = await balancemodel.findOne({uid:req.email})
         const totals = [];
-        console.log("this is below total declaration")
         for(let j =0;j<usertrips.length;j++){
-            console.log("this is inside j for loop")
             let total = 0;
             const exp =  await expensemodel.find({tripCode:usertrips[j].trcode})
-            console.log("this is exp: ",exp)
             for(let x of exp){
-                console.log("this is inside exp loop")
                 let amt = Number(x.amount)
                 total+= amt;
             }
-            console.log("this is end of one cycle of j loop")
             totals.push({tripCode:usertrips[j].trcode,total:total})
 
         }
-        console.log("this is totals: ",totals)
          res.json({success:true,nm:user.name,redirect:'/dashboard',trips:trarr,totals:totals,bal:bal.balances,email:req.email})
         
         }
     }
     else{
-        console.log("user not found")
         res.json({success:false})
     }
 
@@ -164,7 +153,6 @@ app.post('/addtrip',async(req,res)=>{
     }}})
     const bal = await balancemodel.updateOne({uid:req.body.email},{$push:{balances:{tripCode:trcode,amt:0}}})
     if(data&&data2&&bal){
-        console.log("trip added")
         res.json({success:true,redirect:'/dashboard'})
     }
     else{
@@ -174,7 +162,6 @@ app.post('/addtrip',async(req,res)=>{
 })
 
 app.post('/logout',(req,res)=>{
-    console.log("logout requested")
     res.clearCookie("logintoken",{path:'/',httpOnly:true,secure:true,
             sameSite:"none"})
     res.json({success:true})
@@ -205,7 +192,6 @@ app.post("/jointrip",async(req,res)=>{
 })
 
 app.post('/edittrip/:tripcode',middlewre,async(req,res)=>{
-    console.log("im hit")
     if(req.logcheck){
         const trip  = await tripmodel.findOne({tripCode:req.params.tripcode})
         const expenses = await expensemodel.find({tripCode:req.params.tripcode})
@@ -218,7 +204,6 @@ app.post('/edittrip/:tripcode',middlewre,async(req,res)=>{
             stl.push({p:p.name,r:r.name,amt:c.amt})
         }
         }
-        console.log("stl: ",stl)
     if(trip&&expenses){
         let balances = []
         for(let i of trip.members){
@@ -230,7 +215,6 @@ app.post('/edittrip/:tripcode',middlewre,async(req,res)=>{
                 }
             }
         }
-        console.log("this is balances the arr: ",balances)
          res.json({logcheck:true,tripname:trip.tripName,tripcode:trip.tripCode,members:trip.members,expenses:expenses,balances:balances,freezed:trip.freezed,s:s?stl:[]})
     }
     else{
@@ -248,28 +232,21 @@ app.post("/addexpense",async(req,res)=>{
     const amount = Number(req.body.amount);
     const addpayer = await balancemodel.updateOne({uid:req.body.paidbyuid,"balances.tripCode":req.body.tripCode},{$inc:{"balances.$.amt":(amount/n)*(n-1)}})
     for(let i of req.body.members){
-        console.log("this is i of reqmembers: ",i)
         if(i.uid!=req.body.paidbyuid){
             const addothers = await balancemodel.updateOne({uid:i.uid,"balances.tripCode":req.body.tripCode},{$inc:{"balances.$.amt":-1*(amount/n)}})
-            console.log("this is other member: ",addothers)
         }
     }
     if(adddata&&addpayer){
-        console.log("added")
         res.json({success:true})
     }
     else{
-        console.log(failed)
+        console.log("failed")
         res.json({success:false})
     }
 })
 
 app.post("/settletrip",async(req,res)=>{
-    console.log("really settle?")
-    console.log(req.body.tripCode)
-    console.log(req.body.balances)
     let balances =  req.body.balances
-    console.log( "type of bal",typeof balances[0].bal)
     let s = []
     let flag =  true
     let count = 0;
@@ -280,7 +257,6 @@ app.post("/settletrip",async(req,res)=>{
             if(balances[i].bal<min.bal){
                 min =  balances[i]
                 minI = i;
-                console.log("this is curr min:",min, minI)
             }
         }
         let max = balances[0]
@@ -289,7 +265,6 @@ app.post("/settletrip",async(req,res)=>{
             if(balances[j].bal>max.bal){
                 max =  balances[j]
                 maxI = j;
-                console.log("this is curr max: ",max, maxI)
             }
         }
         let dega = Math.min(Math.abs(max.bal),Math.abs(min.bal))
@@ -307,8 +282,6 @@ app.post("/settletrip",async(req,res)=>{
     if(count>=10){
         res.json({success:false})
     }
-    console.log("balances 2",balances)
-    console.log("s: ",s)
     await settlemodel.insertOne({tripCode:req.body.tripCode,s:s})
     const members  =  req.body.members
     await tripmodel.updateOne({tripCode:req.body.tripCode},{$set:{freezed:true}})
@@ -323,13 +296,11 @@ app.post("/settletrip",async(req,res)=>{
 
 app.delete("/deltrip",async(req,res)=>{
     const del = await usermodel.updateOne({email:req.body.email},{$pull:{trips:{trcode:req.body.tripCode}}})
-    console.log("del status: ",del)
     res.json({success:true})
 })
 
 app.post('/settleup',middlewre,async(req,res)=>{
     if(req.logcheck){
-        console.log("this from settleup: ",req.body.email," ",req.body.name)
         const s = await settlemodel.find({"s.p":req.body.email}).lean()
         let stlmnts = []
         let total = 0
@@ -343,14 +314,12 @@ app.post('/settleup',middlewre,async(req,res)=>{
                 }
             }
         }
-        console.log("these are the final settlements: ",stlmnts,"total:",total)
         res.json({success:true,s:stlmnts,total:total})
     }
 })
 
 app.post('/recieve',middlewre,async(req,res)=>{
     const s = await settlemodel.find({"s.r":req.body.email}).lean()
-    console.log("this is false: ",s)
     let rec =[]
     let rtotal =0;
     for(let i of s){
@@ -363,19 +332,14 @@ app.post('/recieve',middlewre,async(req,res)=>{
                 }
             }
         }
-        console.log("this is rec: ",rec," this is rtotal:",rtotal)
     res.json({success:true,rs:rec,rtotal:rtotal})
 })
 
 app.post("/recieved",async(req,res)=>{
-    console.log("this is body of..",req.body)
     const tr= await settlemodel.updateOne({tripCode:req.body.tripCode,"s.r":req.body.email,"s.p":req.body.payer,"s.paid":false},{$set:{"s.$.paid":true}})
-    console.log("this is tr: ",tr)
     res.json({success:true})
 })
 
-app.listen("8080",()=>{
-    console.log(`Server live at: http://localhost:8080`)
+app.listen(process.env.PORT||8080,()=>{
+    console.log(`Server live`)
 })
-
-//[ {} ]
