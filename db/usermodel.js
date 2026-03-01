@@ -10,6 +10,7 @@ const userschema = mongoose.Schema({
     email:String,
     upi:String,
     password:String,
+    goolesub:String,
     trips:[{trcode:String,freezed:Boolean}]
 })
 

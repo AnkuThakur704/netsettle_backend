@@ -12,6 +12,7 @@ import crypto from "crypto"
 import expensemodel from "./db/expenseschema.js"
 import balancemodel from "./db/netbalances.js"
 import settlemodel from "./db/settlement.js"
+import {OAuth2Client} from 'google-auth-library';
 dotenv.config({ path: './.env' })
 
 const app = express()
@@ -82,6 +83,50 @@ app.post('/login',async(req,res)=>{
     }
 });
     }
+})
+
+app.post('/googlelogin',async(req,res)=>{
+    console.log("start of google login backend")
+    const client = new OAuth2Client()
+    const ticket = await  client.verifyIdToken({
+        idToken: req.body.credential,
+        audience: process.env.CLIENT_ID
+    })
+    console.log("this is the google credential: ",req.body.credential)
+    console.log("this is ticket: ",ticket.payload.name)
+    const eml = await usermodel.findOne({email:ticket.payload.email})
+    if(eml){
+       const token = jwt.sign({data: ticket.payload.email}, process.env.JWT_SECRET,{expiresIn:'1h'});
+        res.cookie("logintoken",token,{
+            path:'/',
+            httpOnly:true,
+            secure:true,
+            sameSite:"none",
+            maxAge:60*60*1000
+        })
+        res.json({success:true,exists:true,redirect:'/dashboard',name:ticket.payload.name})
+        
+    }
+    else{
+        await usermodel.insertOne({
+            name:ticket.payload.name,
+            email:ticket.payload.email,
+            upi:null,
+            password:null,
+            goolesub:ticket.payload.sub,
+            trips:[]
+        })
+        const token = jwt.sign({data: ticket.payload.email}, process.env.JWT_SECRET,{expiresIn:'1h'});
+        res.cookie("logintoken",token,{
+            path:'/',
+            httpOnly:true,
+            secure:true,
+            sameSite:"none",
+            maxAge:60*60*1000
+        })
+        res.json({success:true,redirect:'/dashboard',name:ticket.payload.name})
+    }
+    console.log("end of google login")
 })
 
 app.post('/dashboard',checktoken,async(req,res)=>{
