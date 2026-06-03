@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config();
 const dbcon  = process.env.MONGO_URI
 
-mongoose.connect("mongodb://localhost:27017/NetSettle")
+mongoose.connect(dbcon)
 
 const userschema = mongoose.Schema({
     name:String,

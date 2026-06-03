@@ -15,6 +15,11 @@ import settlemodel from "./db/settlement.js"
 import {OAuth2Client} from 'google-auth-library';
 import nodemailer from 'nodemailer'
 import passtokenmodel from "./db/passtokenschema.js"
+import dns from "dns";
+
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
+console.log("DNS:", dns.getServers());
 dotenv.config({ path: './.env' })
 
 const app = express()
