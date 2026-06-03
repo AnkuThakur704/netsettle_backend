@@ -22,11 +22,12 @@ app.use(cors({
     origin:['http://localhost:5173',"https://netsettle-frontend.vercel.app"],
     credentials:true
 }))
-app.options('*', cors())
+app.options('/*splat', cors())
 app.set("trust proxy", 1);
 app.use(cookieParser())
 app.use(express.json())
 app.post('/signup',async(req,res)=>{
+    console.log("sign up hit")
     const eml = await usermodel.findOne({email:req.body.email})
     if(eml){
         res.json({success:true,exits:true})
@@ -78,7 +79,7 @@ app.post('/login',async(req,res)=>{
             secure:true,
             sameSite:"none",
             maxAge:60*60*1000
-        })
+        })  
         res.json({success:true,redirect:'/dashboard',name:eml.name})
     }
     else{
