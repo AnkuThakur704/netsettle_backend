@@ -24,7 +24,7 @@ dotenv.config({ path: './.env' })
 
 const app = express()
 app.use(cors({
-    origin:['http://localhost:5173',"https://netsettle-frontend.vercel.app", "https://netsettle-frontend-1nt7pr0wb-ankuthakur704s-projects.vercel.app"],
+    origin:['http://localhost:5173',"https://netsettle-frontend.vercel.app", "https://netsettle-frontend-gmafapt91-ankuthakur704s-projects.vercel.app"],
     credentials:true
 }))
 app.options('/*splat', cors())
