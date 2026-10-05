@@ -8,7 +8,7 @@ export const checktoken = (req,res,next)=>{
             next()
         }
         else{
-            res.json({success:false,redirect:'/login'})
+            res.status(401).json({success:false,redirect:'/login'})
         }
 });
 }
