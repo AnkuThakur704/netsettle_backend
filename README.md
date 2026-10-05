@@ -1,18 +1,18 @@
-# ⚡ NetSettle Backend  
+#  NetSettle Backend  
 REST API for Trip Expense Splitting & Group Settlements
 
 NetSettle Backend is the powerful server-side component of **NetSettle** — a full-stack application that simplifies tracking and settling shared expenses for group trips, friends, college outings, and travel buddies.
 
 It handles secure authentication, trip management, expense recording, balance calculations, and simplified settlement logic.
 
-## 🚀 Live API
+## Live API
 
 **Production URL:**  
 https://netsettle-backend.onrender.com
 
 (Frontend consuming this API → https://netsettle-frontend.vercel.app/)
 
-## ✨ Core Features
+##  Core Features
 
 - **Authentication**  
   - User registration & login  
@@ -41,7 +41,7 @@ https://netsettle-backend.onrender.com
 - **Session:** HTTP-only cookies  
 - **Deployment:** Render  
 
-## 📂 Backend Project Structure
+##  Backend Project Structure
 
 ```bash
 netsettle_backend/
@@ -97,7 +97,7 @@ npm run dev
 ```
 -Server will be available at:
 http://localhost:5000
-### 🔑 API Endpoints Overview
+###  API Endpoints Overview
 (Assuming standard REST naming — update with your actual routes)
 ```bash
 POST /api/auth/signup → Register new user
@@ -111,12 +111,12 @@ POST /api/expenses     → Add expense to trip
 GET  /api/trips/:id/balances → View current balances
 GET  /api/trips/:id/settle   → Get settlement suggestions
 ```
-### 🌍 Frontend Integration
+###  Frontend Integration
 This backend is actively consumed by:
 Live Frontend: https://netsettle-frontend.vercel.app/
 
 CORS is configured to allow requests from the Vercel frontend domain.
-### 📌 Planned Enhancements
+###  Planned Enhancements
 
 Role-based access control (admin / member)
 Optimized minimal-transaction settlement algorithm
